@@ -12,3 +12,51 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+// user model 
+model User {
+  id Int                            @id @default(autoincrement())
+  email String                      @unique
+  name String                       @map("full_name")
+  role Role?                        @default(USER)
+  profile Profile?
+  post Post[]
+
+  // model attributes
+  @@map("users")
+}
+
+// profile model
+model Profile {
+  id Int        @id @default(autoincrement())
+  bio String
+  userId Int    @unique
+  user User     @relation(fields: [userId], references: [id])
+}
+
+// post model
+model Post {
+  id Int                  @id @default(autoincrement())
+  title String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt       
+  published Boolean       @default(false)
+  authorId Int
+  user User               @relation(fields: [authorId], references: [id])
+  categories Category[]
+}
+
+// category model
+model Category {
+  id Int @id @default(autoincrement())
+  name String
+  postId Int
+  posts Post[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// Automatically stores the time when a record was last updated.
